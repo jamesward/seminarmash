@@ -1,23 +1,19 @@
 package controllers
 
 import play.api.mvc.{Action, Controller}
-import models.Person
+import models.{AppDB, Person}
+import org.squeryl.PrimitiveTypeMode._
 
 object PersonController extends Controller {
   
-  var persons = Vector.empty[Person]
-  
   def addToSeminar = Action { request =>
-    val person: Person = request.getQueryString("name") match {
-      case Some(name) => Person(name)
-      case None => Person("")
+    request.getQueryString("name") match {
+      case Some(name) => {
+        inTransaction(AppDB.personTable insert Person(name))
+        Redirect(routes.Application.index())
+      }
+      case _ => BadRequest("Name not specified")
     }
-    
-    persons = persons :+ person
-    
-    println(persons)
-    
-    Redirect(routes.Application.index())
-  } 
+  }
 
 }

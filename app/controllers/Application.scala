@@ -2,12 +2,19 @@ package controllers
 
 import play.api._
 import play.api.mvc._
+import org.squeryl.PrimitiveTypeMode._
+import models.AppDB
 
 object Application extends Controller {
   
   def index = Action { request =>
     request.session.get("loggedIn").map { loggedIn =>
-      Ok(views.html.index(PersonController.persons))
+      inTransaction {
+        val persons = from(AppDB.personTable)(personTable =>
+          select(personTable)
+        )
+        Ok(views.html.index(persons.seq))
+      }
     }.getOrElse {
       Redirect(routes.Application.showLogin())
     }
