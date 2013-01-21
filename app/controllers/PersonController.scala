@@ -1,18 +1,35 @@
 package controllers
 
+import scala.util.{Try, Success, Failure}
 import play.api.mvc.{Action, Controller}
-import models.{AppDB, Person}
 import org.squeryl.PrimitiveTypeMode._
 
+import controllers.SecurityController.isAuthenticated
+import models.{AppDB, Person}
+
 object PersonController extends Controller {
-  
-  def addToSeminar = Action { request =>
-    request.getQueryString("name") match {
-      case Some(name) => {
-        inTransaction(AppDB.personTable insert Person(name))
-        Redirect(routes.Application.index())
+
+  def index = isAuthenticated {
+    Action { request =>
+      Try(inTransaction(views.html.index(from(AppDB.personTable)(select(_)).seq))) match {
+        case Success(page) => Ok(page)
+        case Failure(error) => InternalServerError(error.getMessage)
       }
-      case _ => BadRequest("Name not specified")
+    }
+  }
+  
+  def addToSeminar = isAuthenticated {
+    Action { request =>
+      request.getQueryString("name").filter(_.nonEmpty).map { name =>
+        Try {
+          inTransaction(AppDB.personTable.insert(Person(name)))
+        } match {
+          case Success(person) => Redirect(routes.PersonController.index())
+          case Failure(error) => InternalServerError(error.getMessage)
+        }
+      }.getOrElse {
+        BadRequest("Name not specified")
+      }
     }
   }
 

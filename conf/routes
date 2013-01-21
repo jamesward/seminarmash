@@ -3,9 +3,9 @@
 # ~~~~
 
 # Home page
-GET     /                           controllers.Application.index
-GET     /login                      controllers.Application.showLogin
-GET     /doLogin                    controllers.Application.doLogin
+GET     /                           controllers.PersonController.index
+GET     /login                      controllers.SecurityController.showLogin
+GET     /doLogin                    controllers.SecurityController.doLogin
 
 GET     /addPerson                  controllers.PersonController.addToSeminar
 
