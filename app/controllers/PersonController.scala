@@ -6,6 +6,7 @@ import org.squeryl.PrimitiveTypeMode._
 
 import controllers.SecurityController.isAuthenticated
 import models.{AppDB, Person}
+import utils.FormUtil
 
 object PersonController extends Controller {
 
@@ -19,8 +20,8 @@ object PersonController extends Controller {
   }
   
   def addToSeminar = isAuthenticated {
-    Action { request =>
-      request.getQueryString("name").filter(_.nonEmpty).map { name =>
+    Action { implicit request =>
+      FormUtil.formParamHeadOption("name").filter(_.nonEmpty).map { name =>
         Try {
           inTransaction(AppDB.personTable.insert(Person(name)))
         } match {

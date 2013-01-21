@@ -1,7 +1,6 @@
 @main("Login") {
     
-    <form action="@routes.SecurityController.doLogin()"
-      method="get">
+    <form action="@routes.SecurityController.doLogin()" method="post">
         <input name="password">
         <input value="Login!" type="submit">
     </form>

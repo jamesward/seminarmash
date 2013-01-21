@@ -1,6 +1,7 @@
 package controllers
 
 import play.api.mvc._
+import utils.FormUtil
 
 object SecurityController extends Controller{
 
@@ -8,21 +9,20 @@ object SecurityController extends Controller{
     Ok(views.html.login())
   }
 
-  def doLogin = Action { request =>
-    Redirect(routes.PersonController.index()).withSession {
-      request.getQueryString("password").map { password =>
-        request.session + ("password" -> password)
-      }.getOrElse(request.session)
+  def doLogin = Action { implicit request =>
+    
+    val maybeSession = FormUtil.formParamHeadOption("password").map { password =>
+      request.session + ("password" -> password)
     }
+    
+    Redirect(routes.PersonController.index()).withSession(maybeSession.getOrElse(request.session))
   }
   
   def isAuthenticated(action: Action[AnyContent]): Action[(Action[AnyContent], AnyContent)] = {
-    Security.Authenticated({ requestHeader: RequestHeader =>
-      requestHeader.session.get("password").filter(_.equals("codemashrocks"))
-    },
-    { requestHeader: RequestHeader =>
-      Redirect(routes.SecurityController.showLogin())
-    }) { user =>
+    Security.Authenticated(
+      requestHeader => requestHeader.session.get("password").filter(_.equals("codemashrocks")),
+      _ => Redirect(routes.SecurityController.showLogin())
+    ) { user =>
       Action { request =>
         action(request)
       }

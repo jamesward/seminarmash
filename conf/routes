@@ -4,10 +4,11 @@
 
 # Home page
 GET     /                           controllers.PersonController.index
-GET     /login                      controllers.SecurityController.showLogin
-GET     /doLogin                    controllers.SecurityController.doLogin
+POST    /addPerson                  controllers.PersonController.addToSeminar
 
-GET     /addPerson                  controllers.PersonController.addToSeminar
+GET     /login                      controllers.SecurityController.showLogin
+POST    /doLogin                    controllers.SecurityController.doLogin
+
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
